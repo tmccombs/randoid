@@ -7,7 +7,7 @@ use crate::randfill::Rng;
 
 impl<'a> Generator<'a, Rng<rand::rngs::ThreadRng>> {
     pub fn with_alphabet(alphabet: &'a [char]) -> Self {
-        Self::new(DEFAULT_SIZE, alphabet, Rng(rand::thread_rng()))
+        Self::new(DEFAULT_SIZE, alphabet, default_random())
     }
 
     pub fn with_size(size: usize) -> Self {
@@ -30,10 +30,10 @@ impl Default for Generator<'static, Rng<rand::rngs::ThreadRng>> {
 }
 
 fn default_random() -> Rng<rand::rngs::ThreadRng> {
-    rand::thread_rng().into()
+    Rng(rand::thread_rng())
 }
 
 #[inline]
-pub fn nanoid() -> String {
+pub fn randoid() -> String {
     Generator::default().gen_id()
 }
