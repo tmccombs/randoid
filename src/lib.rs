@@ -26,6 +26,7 @@ const BUFFER_SIZE: usize = 64;
 /// Default length of a gnerated id
 pub const DEFAULT_SIZE: usize = 21;
 
+#[derive(Clone)]
 pub struct Generator<'a, R> {
     alphabet: &'a [char],
     random: R,
@@ -134,4 +135,23 @@ impl<'a, R: RandomFiller> Generator<'a, R> {
         }
         Ok(())
     }
+}
+
+#[cfg(feature = "std-rand")]
+#[macro_export]
+macro_rules! randoid {
+    () => {
+        $crate::Generator::default().gen_id()
+    };
+    ($size:expr) => {
+        $crate::Generator::with_size($size).gen_id()
+    };
+    ($size:expr, $alphabet:expr) => {
+        $crate::Generator::with_alphabet(&$alphabet)
+            .size($size)
+            .gen_id()
+    };
+    ($size:expr, $alphabet:expr, $rand:expr) => {
+        $crate::Generator::new($size, &$alphabet, $rand.into()).gen_id()
+    };
 }
