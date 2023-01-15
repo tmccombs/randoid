@@ -1,0 +1,2 @@
+# randoid
+Rust nanoid implementation
