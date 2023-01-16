@@ -1,11 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub mod alphabets;
-mod randfill;
 mod std_rand;
 
 pub use alphabets::URL;
-pub use randfill::*;
+use rand::Rng;
 #[cfg(feature = "std-rand")]
 pub use std_rand::*;
 
@@ -33,7 +32,7 @@ pub struct Generator<'a, R> {
     size: usize,
 }
 
-impl<'a, R: RandomFiller> Generator<'a, R> {
+impl<'a, R: Rng> Generator<'a, R> {
     pub fn new(size: usize, alphabet: &'a [char], random: R) -> Self {
         assert!(
             alphabet.len() <= u8::max_value() as usize,
@@ -95,7 +94,7 @@ impl<'a, R: RandomFiller> Generator<'a, R> {
         let mut rem = self.size;
         while rem > 0 {
             let bytes = &mut buffer[..self.size.min(BUFFER_SIZE)];
-            self.random.fill_random(bytes);
+            self.random.fill(bytes);
             for &b in &*bytes {
                 let idx = b as usize & mask;
                 debug_assert!(idx < self.alphabet.len());
@@ -122,7 +121,7 @@ impl<'a, R: RandomFiller> Generator<'a, R> {
         let mut i = 0;
 
         while i < self.size {
-            self.random.fill_random(bytes);
+            self.random.fill(bytes);
 
             for &byte in &*bytes {
                 let byte = byte as usize & mask;
@@ -152,6 +151,6 @@ macro_rules! randoid {
             .gen_id()
     };
     ($size:expr, $alphabet:expr, $rand:expr) => {
-        $crate::Generator::new($size, &$alphabet, $rand.into()).gen_id()
+        $crate::Generator::new($size, &$alphabet, $rand).gen_id()
     };
 }

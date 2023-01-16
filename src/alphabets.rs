@@ -8,10 +8,12 @@ pub const URL: [char; 64] = [
     'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 ];
 
+/// Standard hexadecimal alphabet with lowercase letters
 pub const HEX: [char; 16] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
 ];
 
+/// Standard hexadecimal alphabet with upercase letters
 pub const HEX_UPPER: [char; 16] = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
 ];

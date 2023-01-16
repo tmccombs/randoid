@@ -3,34 +3,31 @@ use super::Generator;
 
 use super::DEFAULT_SIZE;
 use crate::alphabets::URL;
-use crate::randfill::Rng;
 
-impl<'a> Generator<'a, Rng<rand::rngs::ThreadRng>> {
+use rand::{thread_rng, rngs::ThreadRng};
+
+impl<'a> Generator<'a, ThreadRng> {
     pub fn with_alphabet(alphabet: &'a [char]) -> Self {
-        Self::new(DEFAULT_SIZE, alphabet, default_random())
+        Self::new(DEFAULT_SIZE, alphabet, thread_rng())
     }
 
     pub fn with_size(size: usize) -> Self {
         Self {
             alphabet: &URL,
-            random: default_random(),
+            random: thread_rng(),
             size,
         }
     }
 }
 
-impl Default for Generator<'static, Rng<rand::rngs::ThreadRng>> {
+impl Default for Generator<'static, rand::rngs::ThreadRng> {
     fn default() -> Self {
         Self {
             alphabet: &URL,
-            random: default_random(),
+            random: thread_rng(),
             size: DEFAULT_SIZE,
         }
     }
-}
-
-fn default_random() -> Rng<rand::rngs::ThreadRng> {
-    Rng(rand::thread_rng())
 }
 
 #[inline]

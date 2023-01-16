@@ -10,11 +10,11 @@ keywords = ["nanoid", "random", "uuid", "id", "url"]
 categories = ["no-std", "web-programming"]
 
 [dependencies]
-rand = { version = "0.8.5", optional = true, default_features = false}
+rand = { version = "0.8.5", default_features = false}
 smartstring = { version = "1.0", optional = true }
 
 [features]
 default = ["std-rand"]
-std-rand = ["std", "rand", "rand/std", "rand/std_rng"]
+std-rand = ["std", "rand/std", "rand/std_rng"]
 alloc = []
 std = []
