@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod alphabets;
+mod alphabets;
 mod std_rand;
 
-pub use alphabets::URL;
+pub use alphabets::*;
 use rand::Rng;
 #[cfg(feature = "std-rand")]
 pub use std_rand::*;
@@ -22,20 +22,20 @@ use alloc::string::String;
 /// size that is a power of 2.
 const BUFFER_SIZE: usize = 64;
 
-/// Default length of a gnerated id
+/// Default length of a gnerated id (21)
 pub const DEFAULT_SIZE: usize = 21;
 
 #[derive(Clone)]
-pub struct Generator<'a, R> {
-    alphabet: &'a [char],
+pub struct Generator<'a, R, const N: usize = 64> {
+    alphabet: &'a Alphabet<N>,
     random: R,
     size: usize,
 }
 
-impl<'a, R: Rng> Generator<'a, R> {
-    pub fn new(size: usize, alphabet: &'a [char], random: R) -> Self {
+impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
+    pub fn new(size: usize, alphabet: &'a Alphabet<N>, random: R) -> Self {
         assert!(
-            alphabet.len() <= u8::max_value() as usize,
+            N <= u8::max_value() as usize,
             "The alphabet cannot be longer than a `u8`"
         );
         Self {
@@ -45,27 +45,19 @@ impl<'a, R: Rng> Generator<'a, R> {
         }
     }
 
-    pub fn with_random(random: R) -> Self {
-        Self {
-            alphabet: &URL,
-            random,
-            size: DEFAULT_SIZE,
-        }
-    }
-
     pub fn size(self, size: usize) -> Self {
         Self { size, ..self }
     }
 
-    pub fn alphabet(self, alphabet: &'a [char]) -> Self {
-        Self { alphabet, ..self }
+    pub fn alphabet<'b, const M: usize>(self, alphabet: &'b Alphabet<M>) -> Generator<'b, R, M> {
+        Generator { alphabet, size: self.size, random: self.random }
     }
 
     pub fn write_to<W: Write>(&mut self, out: &mut W) -> fmt::Result {
         if self.size == 0 {
             return Ok(());
         }
-        if self.size.is_power_of_two() {
+        if N.is_power_of_two() {
             self.fast_impl(out)
         } else {
             self.generic_impl(out)
@@ -87,8 +79,8 @@ impl<'a, R: Rng> Generator<'a, R> {
     }
 
     fn fast_impl<W: Write>(&mut self, out: &mut W) -> fmt::Result {
-        assert!(self.size.is_power_of_two());
-        let mask = self.alphabet.len() - 1;
+        assert!(N.is_power_of_two());
+        let mask: usize = N - 1;
         debug_assert!(mask.count_ones() == mask.trailing_ones());
         let mut buffer = [0u8; BUFFER_SIZE];
         let mut rem = self.size;
@@ -97,11 +89,11 @@ impl<'a, R: Rng> Generator<'a, R> {
             self.random.fill(bytes);
             for &b in &*bytes {
                 let idx = b as usize & mask;
-                debug_assert!(idx < self.alphabet.len());
+                debug_assert!(idx < N);
                 // Safety: Since the alphabet size is a power of 2, applying the
                 // mask ensures that idx is a valid index into the alphabet
                 // And we assert that it is a power of 2 on the first line.
-                out.write_char(*unsafe { self.alphabet.get_unchecked(idx) })?;
+                out.write_char(self.alphabet.0[idx])?;
             }
             rem -= bytes.len();
         }
@@ -109,7 +101,7 @@ impl<'a, R: Rng> Generator<'a, R> {
     }
 
     fn generic_impl<W: Write>(&mut self, out: &mut W) -> fmt::Result {
-        let mask = self.alphabet.len().next_power_of_two() - 1;
+        let mask = N.next_power_of_two() - 1;
         let mut buffer = [0u8; BUFFER_SIZE];
         let step: usize = BUFFER_SIZE.min(8 * self.size / 5);
         // We don't use the full buffer, because that might require generating
@@ -117,7 +109,7 @@ impl<'a, R: Rng> Generator<'a, R> {
         let bytes = &mut buffer[..step];
 
         // Assert that the masking does not truncate the alphabet.
-        debug_assert!(self.alphabet.len() <= mask + 1);
+        debug_assert!(N <= mask + 1);
         let mut i = 0;
 
         while i < self.size {
@@ -126,13 +118,23 @@ impl<'a, R: Rng> Generator<'a, R> {
             for &byte in &*bytes {
                 let byte = byte as usize & mask;
 
-                if self.alphabet.len() > byte {
-                    out.write_char(self.alphabet[byte])?;
+                if let Some(&c) = self.alphabet.0.get(byte) {
+                    out.write_char(c)?;
                     i += 1;
                 }
             }
         }
         Ok(())
+    }
+}
+
+impl<'a, R: Rng> Generator<'a, R> {
+    pub fn with_random(random: R) -> Self {
+        Self {
+            alphabet: &Alphabet::URL,
+            random,
+            size: DEFAULT_SIZE,
+        }
     }
 }
 
@@ -146,9 +148,7 @@ macro_rules! randoid {
         $crate::Generator::with_size($size).gen_id()
     };
     ($size:expr, $alphabet:expr) => {
-        $crate::Generator::with_alphabet(&$alphabet)
-            .size($size)
-            .gen_id()
+        $crate::Generator::new($size, &$alphabet, rand::thread_rng()).gen_id()
     };
     ($size:expr, $alphabet:expr, $rand:expr) => {
         $crate::Generator::new($size, &$alphabet, $rand).gen_id()
