@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+jobs:
+  test:
+    name: Test and checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install rust toolchain
+        run: |
+          rustup set profile minimal
+          rustup toolchain install stable -c "clippy,rustfmt"
+          rustup default stable
+      - name: Ensure cargo fmt has been run
+        run: cargo fmt --check
+      - name: Run clippy
+        run: cargo clippy --locked --all-targets --all-features
+      - name: Run default tests
+        run: cargo test --locked
+      - name: Test smartstring
+        run: cargo test --locked --features smartstring
+      - name: Test no features
+        run: cargo test --no-default-features
+      - name: Test alloc only
+        run: cargo test --no-default-features --features alloc
+
