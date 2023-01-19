@@ -4,13 +4,12 @@ use super::Generator;
 use super::DEFAULT_SIZE;
 use crate::alphabets::Alphabet;
 
-use rand::{thread_rng, rngs::ThreadRng};
+use rand::{rngs::ThreadRng, thread_rng};
 
 impl<'a, const N: usize> Generator<'a, ThreadRng, N> {
     pub fn with_alphabet(alphabet: &'a Alphabet<N>) -> Self {
         Self::new(DEFAULT_SIZE, alphabet, thread_rng())
     }
-
 }
 
 impl<'a> Generator<'a, ThreadRng> {

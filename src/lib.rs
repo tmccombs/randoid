@@ -50,7 +50,11 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     }
 
     pub fn alphabet<'b, const M: usize>(self, alphabet: &'b Alphabet<M>) -> Generator<'b, R, M> {
-        Generator { alphabet, size: self.size, random: self.random }
+        Generator {
+            alphabet,
+            size: self.size,
+            random: self.random,
+        }
     }
 
     pub fn write_to<W: Write>(&mut self, out: &mut W) -> fmt::Result {
