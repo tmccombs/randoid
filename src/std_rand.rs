@@ -6,13 +6,13 @@ use crate::alphabets::Alphabet;
 
 use rand::{rngs::ThreadRng, thread_rng};
 
-impl<'a, const N: usize> Generator<'a, ThreadRng, N> {
-    pub fn with_alphabet(alphabet: &'a Alphabet<N>) -> Self {
+impl<const N: usize> Generator<ThreadRng, N> {
+    pub fn with_alphabet(alphabet: &'static Alphabet<N>) -> Self {
         Self::new(DEFAULT_SIZE, alphabet, thread_rng())
     }
 }
 
-impl<'a> Generator<'a, ThreadRng> {
+impl Generator<ThreadRng> {
     pub fn with_size(size: usize) -> Self {
         Self {
             alphabet: &Alphabet::URL,
@@ -22,7 +22,7 @@ impl<'a> Generator<'a, ThreadRng> {
     }
 }
 
-impl Default for Generator<'static, rand::rngs::ThreadRng> {
+impl Default for Generator<ThreadRng> {
     fn default() -> Self {
         Self {
             alphabet: &Alphabet::URL,
