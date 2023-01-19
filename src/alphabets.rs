@@ -3,19 +3,60 @@
 /// It has a fixed length, because that can provide the compiler
 /// with more optimization opportunities, and in almost all cases
 /// the alphabet used will be a constant anyway.
-pub struct Alphabet<const N: usize = 64>(pub [char; N]);
+#[derive(Debug)]
+pub struct Alphabet<const N: usize = 64>(pub(crate) [char; N]);
 
 pub type HexAlphabet = Alphabet<16>;
 
-impl Default for Alphabet {
+impl Default for &'static Alphabet {
     fn default() -> Self {
-        Self::URL
+        &Alphabet::URL
     }
 }
 
-impl Default for HexAlphabet {
+impl Default for &'static HexAlphabet {
     fn default() -> Self {
-        Self::HEX
+        &HexAlphabet::HEX
+    }
+}
+
+impl<const N: usize> Alphabet<N> {
+    /// Create a new alphabe from a set of characters
+    ///
+    /// The length of the array should be at least 1 and at most `u8::MAX`.
+    ///
+    /// Each element of the array should be unique.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the number of character is greater than the maximum value of a u8,
+    /// since no possible random byte would be able to map to some values. Similarly,
+    /// an empty alphabet will panic.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use randoid::Alphabet;
+    /// let alph = Alphabet::new(['1', '2', '3', '4']);
+    /// ```
+    ///
+    /// ```should_panic
+    /// # use randoid::Alphabet;
+    /// let alph = Alphabet::new([]);
+    /// ```
+    ///
+    /// ```should_panic
+    /// # use randoid::Alphabet;
+    /// let c = ['0'; (u8::MAX as usize) + 1];
+    /// let alph = Alphabet::new(c);
+    /// ```
+    pub const fn new(chars: [char; N]) -> Self {
+        assert!(N != 0, "Alphabet cannot be empty");
+        assert!(
+            N <= u8::max_value() as usize,
+            "The alphabet cannot be longer than a `u8`"
+        );
+        Alphabet(chars)
     }
 }
 

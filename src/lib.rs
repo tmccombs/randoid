@@ -34,10 +34,6 @@ pub struct Generator<'a, R, const N: usize = 64> {
 
 impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     pub fn new(size: usize, alphabet: &'a Alphabet<N>, random: R) -> Self {
-        assert!(
-            N <= u8::max_value() as usize,
-            "The alphabet cannot be longer than a `u8`"
-        );
         Self {
             size,
             alphabet,
