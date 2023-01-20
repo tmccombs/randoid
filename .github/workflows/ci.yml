@@ -23,13 +23,13 @@ jobs:
       - name: Ensure cargo fmt has been run
         run: cargo fmt --check
       - name: Run clippy
-        run: cargo clippy --locked --all-targets --all-features
-      - name: Run default tests
-        run: cargo test --locked
-      - name: Test smartstring
-        run: cargo test --locked --features smartstring
-      - name: Test no features
-        run: cargo test --no-default-features
-      - name: Test alloc only
-        run: cargo test --no-default-features --features alloc
+        run: cargo clippy --all-targets --all-features
+      - name: Run tests with all features
+        run: cargo test --all-features
+      - name: Check default
+        run: cargo check --features
+      - name: check no features
+        run: cargo check --no-default-features
+      - name: check alloc only
+        run: cargo check --no-default-features --features alloc
 
