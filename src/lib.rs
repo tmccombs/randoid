@@ -64,6 +64,19 @@ impl<R: Rng, const N: usize> Generator<R, N> {
         }
     }
 
+    pub fn fmt(&mut self) -> impl fmt::Display + '_ {
+        use core::cell::RefCell;
+        pub struct Id<'a, R: Rng, const N: usize>(RefCell<&'a mut Generator<R, N>>);
+
+        impl<'a, R: Rng, const N: usize> fmt::Display for Id<'a, R, N> {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                self.0.borrow_mut().write_to(f)
+            }
+        }
+
+        Id(RefCell::new(self))
+    }
+
     #[cfg(any(feature = "std", feature = "alloc"))]
     pub fn gen_id(&mut self) -> String {
         let mut res = String::with_capacity(self.size);
