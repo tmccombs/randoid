@@ -26,14 +26,14 @@ const BUFFER_SIZE: usize = 64;
 pub const DEFAULT_SIZE: usize = 21;
 
 #[derive(Clone)]
-pub struct Generator<R, const N: usize = 64> {
-    alphabet: &'static Alphabet<N>,
+pub struct Generator<'a, R, const N: usize = 64> {
+    alphabet: &'a Alphabet<N>,
     random: R,
     size: usize,
 }
 
-impl<R: Rng, const N: usize> Generator<R, N> {
-    pub fn new(size: usize, alphabet: &'static Alphabet<N>, random: R) -> Self {
+impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
+    pub fn new(size: usize, alphabet: &'a Alphabet<N>, random: R) -> Self {
         Self {
             size,
             alphabet,
@@ -45,7 +45,7 @@ impl<R: Rng, const N: usize> Generator<R, N> {
         Self { size, ..self }
     }
 
-    pub fn alphabet<const M: usize>(self, alphabet: &'static Alphabet<M>) -> Generator<R, M> {
+    pub fn alphabet<'b, const M: usize>(self, alphabet: &'b Alphabet<M>) -> Generator<'b, R, M> {
         Generator {
             alphabet,
             size: self.size,
@@ -141,7 +141,7 @@ impl<R: Rng, const N: usize> Generator<R, N> {
     }
 }
 
-impl<R: Rng> Generator<R> {
+impl<'a, R: Rng> Generator<'a, R> {
     pub fn with_random(random: R) -> Self {
         Self {
             alphabet: &Alphabet::URL,
