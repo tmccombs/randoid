@@ -7,12 +7,18 @@ use crate::alphabets::Alphabet;
 use rand::{rngs::ThreadRng, thread_rng};
 
 impl<'a, const N: usize> Generator<'a, ThreadRng, N> {
+    /// Create a new randoid generator using a specific alphabet
+    ///
+    /// And using the default size and [`rand::thread_rng()`] as the RNG.
     pub fn with_alphabet(alphabet: &'a Alphabet<N>) -> Self {
         Self::new(DEFAULT_SIZE, alphabet, thread_rng())
     }
 }
 
 impl<'a> Generator<'a, ThreadRng> {
+    /// Create a new randoid generator that generates ids of a specific size
+    ///
+    /// But use the default alphabet and [`rand::thread_rng()`] as the RNG.
     pub fn with_size(size: usize) -> Self {
         Self {
             alphabet: &Alphabet::URL,

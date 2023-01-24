@@ -13,8 +13,13 @@ categories = ["no-std", "web-programming"]
 rand = { version = "0.8.5", default_features = false}
 smartstring = { version = "1.0", optional = true }
 
+[dev-dependencies]
+# Needed for reproducible tests
+rand_xoshiro = "0.6.0"
+
 [features]
 default = ["std-rand"]
 std-rand = ["std", "rand/std", "rand/std_rng"]
+smartstring = ["dep:smartstring"]
 alloc = []
 std = []
