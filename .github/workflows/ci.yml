@@ -27,7 +27,7 @@ jobs:
       - name: Run tests with all features
         run: cargo test --all-features
       - name: Check default
-        run: cargo check --features
+        run: cargo check
       - name: check no features
         run: cargo check --no-default-features
       - name: check alloc only
