@@ -182,7 +182,7 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// use randoid::Generator;
     /// use smartstring::alias::String;
     ///
-    /// let random_id: String = Generator::default().gen_smartstringn();
+    /// let random_id: String = Generator::default().gen_smartstring();
     /// ```
     #[cfg(feature = "smartstring")]
     pub fn gen_smartstring(&mut self) -> smartstring::alias::String {
