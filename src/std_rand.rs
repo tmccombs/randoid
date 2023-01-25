@@ -2,8 +2,7 @@
 use super::Generator;
 
 use super::DEFAULT_SIZE;
-use crate::alphabets::Alphabet;
-
+use crate::alphabet::{Alphabet, DEFAULT};
 use rand::{rngs::ThreadRng, thread_rng};
 
 impl<'a, const N: usize> Generator<'a, ThreadRng, N> {
@@ -21,7 +20,7 @@ impl<'a> Generator<'a, ThreadRng> {
     /// But use the default alphabet and [`rand::thread_rng()`] as the RNG.
     pub fn with_size(size: usize) -> Self {
         Self {
-            alphabet: &Alphabet::URL,
+            alphabet: &DEFAULT,
             random: thread_rng(),
             size,
         }
@@ -31,7 +30,7 @@ impl<'a> Generator<'a, ThreadRng> {
 impl Default for Generator<'static, rand::rngs::ThreadRng> {
     fn default() -> Self {
         Self {
-            alphabet: &Alphabet::URL,
+            alphabet: &DEFAULT,
             random: thread_rng(),
             size: DEFAULT_SIZE,
         }

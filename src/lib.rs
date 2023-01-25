@@ -10,10 +10,10 @@ extern crate alloc;
 #[cfg(all(feature = "alloc", not(feature = "std")))]
 use alloc::string::String;
 
-mod alphabets;
+pub mod alphabet;
 mod std_rand;
 
-pub use alphabets::*;
+pub use alphabet::{Alphabet, HexAlphabet};
 use rand::Rng;
 #[cfg(feature = "std-rand")]
 pub use std_rand::*;
@@ -45,11 +45,11 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// # Examples
     ///
     /// ```
-    /// use randoid::{Generator, Alphabet};
+    /// use randoid::{Generator, alphabet::HEX};
     /// # use rand::SeedableRng;
     ///
     /// let rand = rand_xoshiro::Xoshiro256PlusPlus::seed_from_u64(0x04040404);
-    /// let mut gen = Generator::new(8, &Alphabet::HEX, rand);
+    /// let mut gen = Generator::new(8, &HEX, rand);
     /// assert_eq!(gen.gen_id(), "905c2761");
     /// assert_eq!(gen.gen_id(), "304ec655");
     /// ```
@@ -248,7 +248,7 @@ impl<'a, R: Rng> Generator<'a, R> {
     /// Using the default size and alphabet
     pub fn with_random(random: R) -> Self {
         Self {
-            alphabet: &Alphabet::URL,
+            alphabet: &alphabet::DEFAULT,
             random,
             size: DEFAULT_SIZE,
         }
@@ -274,7 +274,7 @@ impl<'g, 'a: 'g, R: Rng, const N: usize> fmt::Display for Fmt<'g, 'a, R, N> {
 /// [`DEFAULT_SIZE`].
 ///
 /// The second argument is the alphabet to use. This macro will automatically add borrow the
-/// alphabet, if an owned value is passed. Defaults to [`Alphabet::URL`].
+/// alphabet, if an owned value is passed. Defaults to [`alphabet::DEFAULT`].
 ///
 /// The third argument is the random number generator to use. Defaults to [`rand::thread_rng()`].
 ///
@@ -295,11 +295,11 @@ impl<'g, 'a: 'g, R: Rng, const N: usize> fmt::Display for Fmt<'g, 'a, R, N> {
 /// assert_eq!(id.len(), 32);
 /// assert!(id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'));
 /// // Generate id with 32 hex characters, but default rng
-/// let id = randoid!(32, randoid::HexAlphabet::HEX);
+/// let id = randoid!(32, &randoid::alphabet::HEX);
 /// assert_eq!(id.len(), 32);
 /// assert!(id.chars().all(|c| c.is_ascii_hexdigit()));
 /// // Generate id with 32 hex characters, using SmallRng for the RNG
-/// let id = randoid!(32, randoid::HexAlphabet::HEX, StdRng::from_entropy());
+/// let id = randoid!(32, &randoid::alphabet::HEX, StdRng::from_entropy());
 /// assert_eq!(id.len(), 32);
 /// assert!(id.chars().all(|c| c.is_ascii_hexdigit()));
 ///
@@ -314,10 +314,16 @@ macro_rules! randoid {
     ($size:expr) => {
         $crate::Generator::with_size($size).gen_id()
     };
-    ($size:expr, $alphabet:expr) => {
+    ($size:expr, &$alphabet:expr) => {
         $crate::Generator::new($size, &$alphabet, rand::thread_rng()).gen_id()
     };
-    ($size:expr, $alphabet:expr, $rand:expr) => {
-        $crate::Generator::new($size, ::std::borrow::Borrow::borrow(&$alphabet), $rand).gen_id()
+    ($size:expr, [$($alphabet:literal),+]) => {
+        randoid!($size, &$crate::alphabet::Alphabet::new([$($alphabet),+]))
+    };
+    ($size:expr, &$alphabet:expr, $rand:expr) => {
+        $crate::Generator::new($size, &$alphabet, $rand).gen_id()
+    };
+    ($size:expr, [$($alphabet:literal),+], $rand:expr) => {
+        randoid!($size, &$crate::alphabet::Alphabet::new([$($alphabet),+]), $rand)
     };
 }
