@@ -6,6 +6,7 @@
 #[derive(Debug)]
 pub struct Alphabet<const N: usize = 64>(pub(crate) [char; N]);
 
+/// Type for alphabet with 16 possible characters
 pub type HexAlphabet = Alphabet<16>;
 
 impl Default for &'static Alphabet {
