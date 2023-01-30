@@ -24,6 +24,15 @@ This particular implementation of nanoid has the following features (many of whi
 - Size of alphabet must be a power of 2
 - Use of generics could increase compilation time
 
+If you want a more generalized alphabet that doesn't have a size that is a power of two and/or isn't know in advance, then
+[`rand::distributions::Slice`](https://docs.rs/rand/0.8.5/rand/distributions/struct.Slice.html) is probably sufficient. For example:
+
+```rust
+use rand::{Rng, distributions::Slice, thread_rng};
+
+let alphabet = ['1', '2', '3', '4', '5', '6', '7', '9', '0', 'a', 'b', 'c'];
+let id: String = thread_rng().sample_iter(&Slice::new(&alphabet).unwrap()).take(21).collect();
+```
 
 ## Feature Flags
 
