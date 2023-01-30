@@ -49,7 +49,7 @@ use randoid::{randoid, Generator};
 // All of the below generate a string like "9wxwPU-kQU-RDjYdxj6Eq"
 let id = randoid();
 let id = randoid!();
-let id = Generator::default().gen_id();
+let id = Generator::default().gen();
 ```
 
 ### Custom length
@@ -60,7 +60,7 @@ use randoid::{randoid, Generator};
 
 // The below generate a string like "M_P_lJcWfI"
 let id = randoid!(10);
-let id = Generator::with_size(10).gen_id();
+let id = Generator::with_size(10).gen();
 ```
 
 ### Custom alphabet
@@ -69,7 +69,7 @@ let id = Generator::with_size(10).gen_id();
 use randoid::{randoid, Generator};
 
 let id = randoid!(21, ['a', 'b', 'c', 'd']);
-let id = Generator::with_alphabet(&randoid::alphabet::HEX).gen_id();
+let id = Generator::with_alphabet(&randoid::alphabet::HEX).gen();
 ```
 
 ### Custom random number generator
@@ -79,7 +79,7 @@ use randoid::{randoid, Generator};
 use rand::rngs::OsRng;
 
 let id = randoid!(21, &randoid::alphabet::DEFAULT, OsRng);
-let id = Generator::with_random(OsRng).gen_id();
+let id = Generator::with_random(OsRng).gen();
 ```
 
 ## About the name

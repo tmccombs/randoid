@@ -56,5 +56,5 @@ impl Default for Generator<'static, rand::rngs::ThreadRng> {
 /// ```
 #[inline]
 pub fn randoid() -> String {
-    Generator::default().gen_id()
+    Generator::default().gen()
 }

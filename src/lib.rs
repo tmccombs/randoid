@@ -50,8 +50,8 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     ///
     /// let rand = rand_xoshiro::Xoshiro256PlusPlus::seed_from_u64(0x04040404);
     /// let mut gen = Generator::new(8, &HEX, rand);
-    /// assert_eq!(gen.gen_id(), "905c2761");
-    /// assert_eq!(gen.gen_id(), "304ec655");
+    /// assert_eq!(gen.gen(), "905c2761");
+    /// assert_eq!(gen.gen(), "304ec655");
     /// ```
     pub fn new(size: usize, alphabet: &'a Alphabet<N>, random: R) -> Self {
         Self {
@@ -68,7 +68,7 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// ```
     /// # use randoid::Generator;
     ///
-    /// let id = Generator::default().size(32).gen_id();
+    /// let id = Generator::default().size(32).gen();
     /// assert_eq!(id.len(), 32);
     /// ```
     pub fn size(self, size: usize) -> Self {
@@ -82,7 +82,7 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// ```
     /// # use randoid::{Generator, Alphabet};
     ///
-    /// let id = Generator::default().alphabet(&Alphabet::new(['a', 'b', 'c', 'd'])).gen_id();
+    /// let id = Generator::default().alphabet(&Alphabet::new(['a', 'b', 'c', 'd'])).gen();
     /// assert!(id.chars().all(|c| matches!(c, 'a'..='d')));
     /// ```
     pub fn alphabet<const M: usize>(self, alphabet: &Alphabet<M>) -> Generator<'_, R, M> {
@@ -113,7 +113,7 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     ///
     /// # See Also
     /// - [`Generator::fmt`]
-    /// - [`Generator::gen_id`]
+    /// - [`Generator::gen`]
     /// - [`Generator::gen_smartstring`]
     /// - [`Generator::fmt`]
     pub fn write_to<W: Write>(&mut self, out: &mut W) -> fmt::Result {
@@ -181,10 +181,10 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// # Examples
     ///
     /// ```
-    /// let random_id = randoid::Generator::default().gen_id();
+    /// let random_id = randoid::Generator::default().gen();
     /// ```
     #[cfg(any(feature = "std", feature = "alloc"))]
-    pub fn gen_id(&mut self) -> String {
+    pub fn gen(&mut self) -> String {
         let mut res = String::with_capacity(self.size);
         self.write_to(&mut res).unwrap();
         res
@@ -278,16 +278,16 @@ macro_rules! randoid {
         $crate::randoid()
     };
     ($size:expr) => {
-        $crate::Generator::with_size($size).gen_id()
+        $crate::Generator::with_size($size).gen()
     };
     ($size:expr, &$alphabet:expr) => {
-        $crate::Generator::new($size, &$alphabet, rand::thread_rng()).gen_id()
+        $crate::Generator::new($size, &$alphabet, rand::thread_rng()).gen()
     };
     ($size:expr, [$($alphabet:literal),+]) => {
         randoid!($size, &$crate::alphabet::Alphabet::new([$($alphabet),+]))
     };
     ($size:expr, &$alphabet:expr, $rand:expr) => {
-        $crate::Generator::new($size, &$alphabet, $rand).gen_id()
+        $crate::Generator::new($size, &$alphabet, $rand).gen()
     };
     ($size:expr, [$($alphabet:literal),+], $rand:expr) => {
         randoid!($size, &$crate::alphabet::Alphabet::new([$($alphabet),+]), $rand)
