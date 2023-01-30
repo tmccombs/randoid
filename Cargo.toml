@@ -23,3 +23,7 @@ std-rand = ["std", "rand/std", "rand/std_rng"]
 smartstring = ["dep:smartstring"]
 alloc = []
 std = []
+
+[package.metadata.docs.rs]
+features = ["smartstring"]
+rustdoc-args = ["--cfg", "docsrs"]

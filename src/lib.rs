@@ -201,6 +201,7 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// let random_id: String = Generator::default().gen_smartstring();
     /// ```
     #[cfg(feature = "smartstring")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "smartstring")))]
     pub fn gen_smartstring(&mut self) -> smartstring::alias::String {
         let mut res = smartstring::alias::String::new();
         self.write_to(&mut res).unwrap();
