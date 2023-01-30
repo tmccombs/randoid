@@ -47,7 +47,7 @@ let id: String = thread_rng().sample_iter(&Slice::new(&alphabet).unwrap()).take(
 
 ```toml
 [dependencies]
-randoid = "0.2.0"
+randoid = "0.3.0"
 ```
 
 ### Simple
