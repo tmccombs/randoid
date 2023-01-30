@@ -34,9 +34,12 @@ impl<const N: usize> Alphabet<N> {
     ///
     /// # Panics
     ///
-    /// Panics if the number of character is greater than the maximum value of a u8,
-    /// since no possible random byte would be able to map to some values. Similarly,
-    /// an empty alphabet will panic.
+    /// Panics if:
+    /// - the number of character is greater than the maximum value of a u8,
+    /// since no possible random byte would be able to map to some values.
+    /// - the alphabet is empty, since nothing can be generated with an empty alphabet
+    /// - the number of characters isn't a power of 2, because the implementation assumes a power
+    /// of 2 size.
     ///
     /// # Examples
     ///
@@ -44,6 +47,8 @@ impl<const N: usize> Alphabet<N> {
     /// # use randoid::Alphabet;
     /// let alph = Alphabet::new(['1', '2', '3', '4']);
     /// ```
+    ///
+    /// The following would panic:
     ///
     /// ```should_panic
     /// # use randoid::Alphabet;
@@ -55,7 +60,18 @@ impl<const N: usize> Alphabet<N> {
     /// let c = ['0'; (u8::MAX as usize) + 1];
     /// let alph = Alphabet::new(c);
     /// ```
+    ///
+    /// ```should_panic
+    /// # use randoid::Alphabet;
+    /// let alph = Alphabet::new(['1', '2', '3']);
+    /// ```
+    ///
+    #[track_caller]
     pub const fn new(chars: [char; N]) -> Self {
+        assert!(
+            N.is_power_of_two(),
+            "Alphabet must have a length that is a power of two"
+        );
         assert!(N != 0, "Alphabet cannot be empty");
         assert!(
             N <= u8::max_value() as usize,

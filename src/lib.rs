@@ -82,10 +82,10 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
     /// ```
     /// # use randoid::{Generator, Alphabet};
     ///
-    /// let id = Generator::default().alphabet(&Alphabet::new(['a', 'b', 'c', 'd', 'e'])).gen_id();
-    /// assert!(id.chars().all(|c| matches!(c, 'a'..='e')));
+    /// let id = Generator::default().alphabet(&Alphabet::new(['a', 'b', 'c', 'd'])).gen_id();
+    /// assert!(id.chars().all(|c| matches!(c, 'a'..='d')));
     /// ```
-    pub fn alphabet<'b, const M: usize>(self, alphabet: &'b Alphabet<M>) -> Generator<'b, R, M> {
+    pub fn alphabet<const M: usize>(self, alphabet: &Alphabet<M>) -> Generator<'_, R, M> {
         Generator {
             alphabet,
             size: self.size,
@@ -120,11 +120,26 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
         if self.size == 0 {
             return Ok(());
         }
-        if N.is_power_of_two() {
-            self.fast_impl(out)
-        } else {
-            self.generic_impl(out)
+        debug_assert!(N.is_power_of_two());
+        let mask: usize = N - 1;
+        debug_assert!(mask.count_ones() == mask.trailing_ones());
+        let mut buffer = [0u8; BUFFER_SIZE];
+        let mut rem = self.size;
+        while rem > 0 {
+            let bytes = &mut buffer[..self.size.min(BUFFER_SIZE)];
+            // This generates more bits than we actually need, but using one byte per character
+            // makes the implementation a lot simpler than tracking how many bits have been used.
+            self.random.fill(bytes);
+            for &b in &*bytes {
+                let idx = b as usize & mask;
+                debug_assert!(idx < N);
+                // Since the alphabet size is a power of 2, applying the
+                // mask ensures that idx is a valid index into the alphabet.
+                out.write_char(self.alphabet.0[idx])?;
+            }
+            rem -= bytes.len();
         }
+        Ok(())
     }
 
     /// Return an object which implements [`std::fmt::Display`]
@@ -190,55 +205,6 @@ impl<'a, R: Rng, const N: usize> Generator<'a, R, N> {
         let mut res = smartstring::alias::String::new();
         self.write_to(&mut res).unwrap();
         res
-    }
-
-    fn fast_impl<W: Write>(&mut self, out: &mut W) -> fmt::Result {
-        assert!(N.is_power_of_two());
-        let mask: usize = N - 1;
-        debug_assert!(mask.count_ones() == mask.trailing_ones());
-        let mut buffer = [0u8; BUFFER_SIZE];
-        let mut rem = self.size;
-        while rem > 0 {
-            let bytes = &mut buffer[..self.size.min(BUFFER_SIZE)];
-            self.random.fill(bytes);
-            for &b in &*bytes {
-                let idx = b as usize & mask;
-                debug_assert!(idx < N);
-                // Safety: Since the alphabet size is a power of 2, applying the
-                // mask ensures that idx is a valid index into the alphabet
-                // And we assert that it is a power of 2 on the first line.
-                out.write_char(self.alphabet.0[idx])?;
-            }
-            rem -= bytes.len();
-        }
-        Ok(())
-    }
-
-    fn generic_impl<W: Write>(&mut self, out: &mut W) -> fmt::Result {
-        let mask = N.next_power_of_two() - 1;
-        let mut buffer = [0u8; BUFFER_SIZE];
-        let step: usize = BUFFER_SIZE.min(8 * self.size / 5);
-        // We don't use the full buffer, because that might require generating
-        // more random data than we need.
-        let bytes = &mut buffer[..step];
-
-        // Assert that the masking does not truncate the alphabet.
-        debug_assert!(N <= mask + 1);
-        let mut i = 0;
-
-        while i < self.size {
-            self.random.fill(bytes);
-
-            for &byte in &*bytes {
-                let byte = byte as usize & mask;
-
-                if let Some(&c) = self.alphabet.0.get(byte) {
-                    out.write_char(c)?;
-                    i += 1;
-                }
-            }
-        }
-        Ok(())
     }
 }
 

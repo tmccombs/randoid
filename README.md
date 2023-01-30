@@ -15,13 +15,14 @@ This particular implementation of nanoid has the following features (many of whi
 - no_std support
 - can be used without allocating (by writing characters directly to output)
 - Allows using any [`Rng`](https://docs.rs/rand/latest/rand/trait.Rng.html) implementation as a source of random data.
-- Special case optimized implementation if the size of the alphabet is a power of 2
+- Implementation is optimized for the size of the alphabet being a power of 2
 - [`smartstring`](https://crates.io/crates/smartstring) support, if the `smarstring` features is enabled (as an additive feature).
 
 ## Limitations
 
 - Requires knowing the size of the alphabet at compile time (the main reason for this is it can help the compiler optimize it better)
-- Use of generecs could increase compilation time
+- Size of alphabet must be a power of 2
+- Use of generics could increase compilation time
 
 
 ## Feature Flags
@@ -67,7 +68,7 @@ let id = Generator::with_size(10).gen_id();
 ```rust
 use randoid::{randoid, Generator};
 
-let id = randoid!(21, ['a', 'b', 'c', 'd', 'e']);
+let id = randoid!(21, ['a', 'b', 'c', 'd']);
 let id = Generator::with_alphabet(&randoid::alphabet::HEX).gen_id();
 ```
 
