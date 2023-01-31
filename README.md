@@ -16,7 +16,7 @@ This particular implementation of nanoid has the following features (many of whi
 - can be used without allocating (by writing characters directly to output)
 - Allows using any [`Rng`](https://docs.rs/rand/latest/rand/trait.Rng.html) implementation as a source of random data.
 - Implementation is optimized for the size of the alphabet being a power of 2
-- [`smartstring`](https://crates.io/crates/smartstring) support, if the `smarstring` features is enabled (as an additive feature).
+- [`smartstring`](https://crates.io/crates/smartstring) support, if the `smartstring` features is enabled (as an additive feature).
 
 ## Limitations
 
